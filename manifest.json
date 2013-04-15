@@ -1,0 +1,14 @@
+{
+	"name":"Bandcamp Volume",
+	"manifest_version":2,
+	"version":"0.1",
+	
+	"description":"Adds a volume slider to Bandcamp album pages on bandcamp.com",
+
+	"content_scripts":[
+		{
+			"matches":["*://*.bandcamp.com/*"],
+			"js":["scripts/volume.js"]
+		}
+	]
+}
