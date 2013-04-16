@@ -19,9 +19,6 @@ I'd also like to give a shoutout to [Aaron Ahmed](https://github.com/polar-bear)
 ## Known Limitations
 - The volume slider does not work on the compact UI yet. When you make the page smaller, the volume bar does not show up on the compact UI.
 
-- Bandcamp automatically restores your position when you navigate away from and back to a page. The volume slider, however, does not save it's state and will default to Bandcamp's default volume.
-
-
 ## License
 All source code in this project are licensed under the MIT license.
 
