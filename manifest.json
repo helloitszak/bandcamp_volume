@@ -4,6 +4,9 @@
 	"version":"0.1",
 	
 	"description":"Adds a volume slider to Bandcamp album pages on bandcamp.com",
+	"permissions":[
+		"storage"
+	],
 
 	"content_scripts":[
 		{
