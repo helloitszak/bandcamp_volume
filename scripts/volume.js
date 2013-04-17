@@ -28,7 +28,7 @@ var BandcampVolume =
 		// Rebind this for use in the callback
 		var bcv = this
 		chrome.storage.local.get("volume", function(items) {
-			var newvol = items["volume"]
+			var newvol = items["volume"] || bcv._audiotag.volume
 
 			bcv._ranges.forEach(function(element, index, array)
 			{
