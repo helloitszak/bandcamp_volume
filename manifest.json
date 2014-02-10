@@ -1,7 +1,7 @@
 {
 	"name":"Bandcamp Volume",
 	"manifest_version":2,
-	"version":"1.2",
+	"version":"1.3",
 	
 	"description":"Adds a volume slider to Bandcamp album pages on bandcamp.com",
 	"permissions":[
