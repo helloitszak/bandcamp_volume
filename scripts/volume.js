@@ -70,6 +70,7 @@ var BandcampVolume =
 		range.style.webkitAppearance = "none"
 		range.style.background = "none"
 		range.style.border = playprogbar_style.border
+		range.style.outline = "none";
 
 		range.type="range"
 		range.max = 1
