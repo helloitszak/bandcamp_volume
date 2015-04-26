@@ -38,7 +38,7 @@ var BandcampVolume =
 		});
 
 		// Create the volume layout
-		var desktop_view = document.getElementsByClassName("inline_player desktop-view")[0]
+		var desktop_view = document.getElementsByClassName("inline_player")[0]
 		var audiotag = document.getElementsByTagName("audio")[0] 
 		desktop_view.querySelector("tr:first-child td:first-child").setAttribute("rowspan", "3")
 
