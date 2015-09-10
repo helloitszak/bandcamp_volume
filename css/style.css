@@ -1,0 +1,160 @@
+/*BandcampVolume CSS*/
+
+@font-face {
+  font-family: 'bandcampvolume';
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/bandcampvolume.eot?28577039');
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/bandcampvolume.eot?28577039#iefix') format('embedded-opentype'),
+       url('chrome-extension://__MSG_@@extension_id__/fonts/bandcampvolume.woff?28577039') format('woff'),
+       url('chrome-extension://__MSG_@@extension_id__/fonts/bandcampvolume.ttf?28577039') format('truetype'),
+       url('chrome-extension://__MSG_@@extension_id__/fonts/bandcampvolume.svg?28577039#bandcampvolume') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+ [class^="BandcampVolume_icon_"]:before, [class*=" BandcampVolume_icon_"]:before {
+  font-family: "bandcampvolume";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-align: center;
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+ 
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+}
+
+.BandcampVolume_user_container {
+    margin-left: 0.83em;
+    margin-top: 0.2em;
+}
+
+.BandcampVolume_inner_container:hover {
+    opacity: 1;
+    bottom: -1px;
+}
+
+.BandcampVolume_container:hover {
+    opacity: 1;
+}
+
+.BandcampVolume_container {
+    background-color: rgba(255,255,255,.9);
+    display: block;
+    z-index: 999;
+    padding: 10px;
+    border-top-left-radius: 3px;
+    border: 1px solid #B7B7B7;
+    border-bottom: none;
+    opacity: 0.5;
+    transition: 0.3s;
+}
+
+.BandcampVolume_inner_container {
+    position: absolute;
+    width: 138px;
+    height: 36px;
+    bottom: -22px;
+    visibility: visible;
+    right: 0;
+    transition: 0.3s;
+    opacity: 0.9;
+}
+
+.BandcampVolume_outer_container {
+    width: 1020px;
+    height: 35px;
+    position: fixed;
+    bottom: 0;
+    visibility: hidden;
+}
+
+.BandcampVolume_hoverBox::before {
+    content: "Volume"
+}
+
+.BandcampVolume_hoverBox {
+    width: 37px;
+    height: 10px;
+    background: #fff;
+    position: absolute;
+    right: 0;
+    bottom: 35px;
+    display: block;
+    z-index: -1;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border: 1px solid #B7B7B7;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+
+
+.BandcampVolume_label {
+    font-size: 13px;
+    width: 20px;
+    padding: 0;
+    text-decoration: none;
+    background: none;
+    border: none;
+    color: #000;
+    outline: none;
+    margin-right: 0.3em;
+    font-weight: bold;
+    display: inline-block;
+    vertical-align: middle;
+    height: 14px;
+}
+
+.BandcampVolume_label:hover {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.BandcampVolume_label::before { 
+    content: '\e800'; 
+}
+
+.BandcampVolume_icon_volume_high::before {
+    content: '\e800'; 
+}
+
+.BandcampVolume_icon_volume_med::before {
+    content: '\e801'; 
+}
+
+.BandcampVolume_icon_volume_low::before {
+    content: '\e803'; 
+}
+
+.BandcampVolume_icon_volume_mute::before { 
+    content: '\e802'; 
+}
+
+.BandcampVolume_range {
+    -webkit-appearance: none;
+    display: inline-block;
+    vertical-align: middle;
+    height: 4px;
+    width: 85px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.298039);
+    border: 1px solid #bbb;
+}
+
+.BandcampVolume_range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 10px;
+    width: 17px;
+    border-radius: 2px;
+    cursor: pointer;
+    margin-top: 0px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.247059);
+}
