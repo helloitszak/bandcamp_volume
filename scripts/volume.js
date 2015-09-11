@@ -1,7 +1,7 @@
 var BandcampVolume = 
 {
     _ranges:[],
-    _audiotag:null,
+    _audiotags:[],
     _volSpeaker:null,
     _lastVol:null,
     _slider_lastVol:null,
@@ -9,11 +9,11 @@ var BandcampVolume =
     {
         var vol = parseFloat(evt.target.value)
         // Set the audio tag's volume to the slider's volume
-        this._audiotag.volume = vol
+        for(i = 0;i < this._audiotags.length; i++) {
+            this._audiotags[i].volume = vol
+        }
 
         this._volSpeaker_set(vol)
-
-        //if(vol > 0) this._volSpeaker.value = 0
     },
     _slider_set:function(evt)
     {
@@ -45,7 +45,7 @@ var BandcampVolume =
     {
         var vol = parseFloat(evt.target.value)
 
-        this._lastVol = this._audiotag.volume
+        this._lastVol = this._audiotags[0].volume
 
         this._slider_change(evt)
         this._slider_set(evt)
@@ -62,13 +62,15 @@ var BandcampVolume =
     _auto_set:function(bcv) 
     {
         chrome.storage.local.get("volume", function(items) {
-            var newvol = items["volume"] || bcv._audiotag.volume
+            var newvol = items["volume"] || bcv._audiotags[0].volume
 
             bcv._ranges.forEach(function(element, index, array)
             {
                 element.value = newvol
             })
-            bcv._audiotag.volume = newvol
+            bcv._audiotags.forEach(function(element, index, array) {
+                bcv._audiotags[index].volume = newvol
+            })
             bcv._volSpeaker_set(newvol)
             if(newvol > 0) bcv._volSpeaker.value = 0
         })
@@ -115,10 +117,8 @@ var BandcampVolume =
     load:function()
     {
         var page = this._this_page()
-        if(page == "discover" || page == "feed" || page == "user")
-            this._audiotag = document.getElementsByTagName("audio")[0]
-        else if(page == "home")
-            this._audiotag = document.getElementsByTagName("audio")[4]
+
+        this._audiotags = Array.prototype.slice.call(document.getElementsByTagName("audio"))
 
         var desktop_view = document.getElementsByClassName("inline_player")[0]
 
@@ -129,8 +129,6 @@ var BandcampVolume =
             var row = document.createElement("tr")
             var col = row.appendChild(document.createElement("td"))
             col.setAttribute("colspan", "3")
-        } else if (page == "home") {
-
         }
 
         var volcontainer = document.createElement("div")
@@ -164,27 +162,24 @@ var BandcampVolume =
         var playprogbarthumb = desktop_view.querySelector(".thumb")
         var playprogbarthumb_style = (playprogbarthumb.currentStyle || window.getComputedStyle(playprogbarthumb, null))
 
-        var css = "/*BandcampVolume CSS*/ .BandcampVolume_range::-webkit-slider-thumb"
-
         if(page == "user") {
-            range.style.background = playprogbar_style.backgroundColor
-            range.style.border = playprogbar_style.border
-            css=css+"{background: " + playprogbarthumb_style.background + " !important; border: " + playprogbarthumb_style.border + " !important; border-color: " + playprogbarthumb_style.borderColor + " !important; height: 10px; width: 17px; border-radius: 2px;}"
+            var css="/*BandcampVolume CSS*/ .BandcampVolume_range {background: " + playprogbar_style.backgroundColor + "; border: " + playprogbar_style.border + "} .BandcampVolume_range::-webkit-slider-thumb {background: " + playprogbarthumb_style.background + " !important; border: " + playprogbarthumb_style.border + " !important; border-color: " + playprogbarthumb_style.borderColor + " !important; height: 10px; width: 17px; border-radius: 2px;}"
+            style=document.createElement('style')
+            if (style.styleSheet)
+                style.styleSheet.cssText=css
+            else 
+                style.appendChild(document.createTextNode(css))
+            document.getElementsByTagName('head')[0].appendChild(style)
         } else if (page == "home") {
-            css=css+"{background: " + playprogbarthumb_style.background + " !important; border: none !important; height: 19px !important; width: 19px !important} .BandcampVolume_range {display: block; float: right; margin-top: 4px; border-radius: 3px !important}"
+            range.className = range.className + " BandcampVolume_range_home"
         }
-        style=document.createElement('style')
-        if (style.styleSheet)
-            style.styleSheet.cssText=css
-        else 
-            style.appendChild(document.createTextNode(css))
-        document.getElementsByTagName('head')[0].appendChild(style)
+
 
         range.type="range"
         range.max = 1
         range.step = 0.01
         range.min = 0
-        range.value = this._audiotag.volume
+        range.value = this._audiotags[0].volume
         range.addEventListener("input", this._slider_change.bind(this))
         range.addEventListener("change", this._slider_set.bind(this))
         this._volSpeaker.addEventListener("click", this._set_volume_evt.bind(this))       
