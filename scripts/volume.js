@@ -171,8 +171,7 @@ var BandcampVolume =
             range.style.border = playprogbar_style.border
             css=css+"{background: " + playprogbarthumb_style.background + " !important; border: " + playprogbarthumb_style.border + " !important; border-color: " + playprogbarthumb_style.borderColor + " !important; height: 10px; width: 17px; border-radius: 2px;}"
         } else if (page == "home") {
-            range.style.borderRadius = "3px"
-            css=css+"{background: " + playprogbarthumb_style.background + " !important; border: none !important; height: 19px !important; width: 19px !important}"
+            css=css+"{background: " + playprogbarthumb_style.background + " !important; border: none !important; height: 19px !important; width: 19px !important} .BandcampVolume_range {display: block; float: right; margin-top: 4px; border-radius: 3px !important}"
         }
         style=document.createElement('style')
         if (style.styleSheet)
