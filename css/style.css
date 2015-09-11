@@ -58,7 +58,7 @@
     position: absolute;
     width: 138px;
     height: 36px;
-    bottom: -22px;
+    bottom: -36px;
     visibility: visible;
     right: 0;
     transition: 0.3s;
@@ -66,6 +66,8 @@
 }
 
 .BandcampVolume_outer_container {
+    display: block;
+    z-index: 999;
     width: 1020px;
     height: 35px;
     position: fixed;

@@ -114,31 +114,68 @@ var BandcampVolume =
 
         return null
     },
+    _containerResize:function()
+    {
+        if(this._this_page() == "home") {
+            var wrapper = document.getElementsByClassName('home-bd')[0]
+        } else {
+            var wrapper = document.getElementById('centerWrapper')
+        }
+
+        var wrapper_style = (wrapper.currentStyle || window.getComputedStyle(wrapper, null)),
+        outerContainer = document.getElementsByClassName('BandcampVolume_outer_container')[0]
+        outerContainer.style.width = wrapper_style.width
+    },
     load:function()
     {
         var page = this._this_page()
 
         this._audiotags = Array.prototype.slice.call(document.getElementsByTagName("audio"))
 
-        var desktop_view = document.getElementsByClassName("inline_player")[0]
+        var volcontainer = document.createElement("div")
+        this._volSpeaker = document.createElement("button")
+        this._volSpeaker.type = "button"
+        var range = document.createElement("input")
+        range.className = "BandcampVolume_range"
+        this._auto_set(this)
 
         if(page == "user") {
+            volcontainer.className = "BandcampVolume_user_container"   
+
+            var desktop_view = document.getElementsByClassName("inline_player")[0]            
             // Create the volume layout
             desktop_view.querySelector("tr:first-child td:first-child").setAttribute("rowspan", "3")
 
-            var row = document.createElement("tr")
-            var col = row.appendChild(document.createElement("td"))
+            var row = document.createElement("tr"),
+            col = row.appendChild(document.createElement("td"))
             col.setAttribute("colspan", "3")
-        }
 
-        var volcontainer = document.createElement("div")
-        if(page == "user") {
-            volcontainer.className = "BandcampVolume_user_container"
+            // Get some stuff from the player progress bar to add style to the volume bar
+            var playprogbar = desktop_view.querySelector(".progbar_empty"),
+            playprogbar_style = (playprogbar.currentStyle || window.getComputedStyle(playprogbar, null)),
+            playprogbarthumb = desktop_view.querySelector(".thumb"),
+            playprogbarthumb_style = (playprogbarthumb.currentStyle || window.getComputedStyle(playprogbarthumb, null)),
+            css = "/*BandcampVolume CSS*/ .BandcampVolume_range {background: " + playprogbar_style.backgroundColor + "; border: " + playprogbar_style.border + "} .BandcampVolume_range::-webkit-slider-thumb {background: " + playprogbarthumb_style.background + " !important; border: " + playprogbarthumb_style.border + " !important; border-color: " + playprogbarthumb_style.borderColor + " !important; height: 10px; width: 17px; border-radius: 2px;}"
+            
+            style=document.createElement('style')
+            if (style.styleSheet)
+                style.styleSheet.cssText=css
+            else 
+                style.appendChild(document.createTextNode(css))
+            document.getElementsByTagName('head')[0].appendChild(style)
         } else {
-            volcontainer.className = "BandcampVolume_container"
+            range.className = range.className + " BandcampVolume_range_home"
 
-            var outerContainer = document.createElement("div")
+            volcontainer.className = "BandcampVolume_container"
+            if(page == "home") {
+                var wrapper = document.getElementsByClassName('home-bd')[0]
+            } else {
+                var wrapper = document.getElementById('centerWrapper')
+            }
+            var wrapper_style = (wrapper.currentStyle || window.getComputedStyle(wrapper, null)),
+            outerContainer = document.createElement("div")
             outerContainer.className = "BandcampVolume_outer_container"
+            outerContainer.style.width = wrapper_style.width
 
             var innerContainer = document.createElement("div")
             innerContainer.className = "BandcampVolume_inner_container"
@@ -147,33 +184,6 @@ var BandcampVolume =
             volHover.className = "BandcampVolume_hoverBox"
             volHover.className = volHover.className + " icon-volume"
         }
-
-        this._volSpeaker = document.createElement("button")
-        this._volSpeaker.type = "button"
-        this._auto_set(this)
-
-        // Get some stuff from the player progress bar to add style to the volume bar
-        var playprogbar = desktop_view.querySelector(".progbar_empty")
-        var playprogbar_style = (playprogbar.currentStyle || window.getComputedStyle(playprogbar, null))
-
-        var range = document.createElement("input")
-        range.className = "BandcampVolume_range"
-
-        var playprogbarthumb = desktop_view.querySelector(".thumb")
-        var playprogbarthumb_style = (playprogbarthumb.currentStyle || window.getComputedStyle(playprogbarthumb, null))
-
-        if(page == "user") {
-            var css="/*BandcampVolume CSS*/ .BandcampVolume_range {background: " + playprogbar_style.backgroundColor + "; border: " + playprogbar_style.border + "} .BandcampVolume_range::-webkit-slider-thumb {background: " + playprogbarthumb_style.background + " !important; border: " + playprogbarthumb_style.border + " !important; border-color: " + playprogbarthumb_style.borderColor + " !important; height: 10px; width: 17px; border-radius: 2px;}"
-            style=document.createElement('style')
-            if (style.styleSheet)
-                style.styleSheet.cssText=css
-            else 
-                style.appendChild(document.createTextNode(css))
-            document.getElementsByTagName('head')[0].appendChild(style)
-        } else if (page == "home") {
-            range.className = range.className + " BandcampVolume_range_home"
-        }
-
 
         range.type="range"
         range.max = 1
@@ -195,7 +205,10 @@ var BandcampVolume =
             innerContainer.appendChild(volcontainer)
             innerContainer.appendChild(volHover)
             outerContainer.appendChild(innerContainer)
-            document.getElementsByClassName('home-bd')[0].appendChild(outerContainer)
+            wrapper.appendChild(outerContainer)
+
+            var bcv = this
+            window.addEventListener('resize', function(event){bcv._containerResize()})      
         }
 
     }
