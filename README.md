@@ -17,7 +17,7 @@ I'd also like to give a shoutout to [Aaron Ahmed](https://github.com/polar-bear)
 
 ## Changelog
 
-# Version 1.5
+### Version 1.5
 
 - [[josh-bridge](https://github.com/josh-bridge)] Added options page
 - [[josh-bridge](https://github.com/josh-bridge)] Volume can now be synchronised between tabs
@@ -25,7 +25,7 @@ I'd also like to give a shoutout to [Aaron Ahmed](https://github.com/polar-bear)
 - [[josh-bridge](https://github.com/josh-bridge)] Changed Extension Icon set to new logo
 - [[josh-bridge](https://github.com/josh-bridge)] Code improvements & comments
 
-# Version 1.4
+### Version 1.4
 
 - [[josh-bridge](https://github.com/josh-bridge)] Fixed slider not appearing on home page
 - [[josh-bridge](https://github.com/josh-bridge)] Fixed slider not changing audio volume on home page (Issue #3)
