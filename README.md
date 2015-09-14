@@ -1,7 +1,6 @@
 # Bandcamp Volume
 
-A Chrome Extension to add a volume slider to [bandcamp](http://www.bandcamp.com) album pages. Once this app is a little more mature, I plan on publishing it on the Chrome Web Store.
-
+A Chrome Extension to add a volume slider to most [bandcamp](http://www.bandcamp.com) pages.
 
 ## Usage
 You can test this out by cloning the repository and simply loading it into chrome as an unpackaged extention.
@@ -16,8 +15,27 @@ This gave me inspiration to try and refresh my knowledge on HTML/JS/CSS and star
 
 I'd also like to give a shoutout to [Aaron Ahmed](https://github.com/polar-bear) for helping me derust my JS and CSS.
 
+## Changelog
+
+# Version 1.5
+
+- [[josh-bridge](https://github.com/josh-bridge)] Added options page
+- [[josh-bridge](https://github.com/josh-bridge)] Volume can now be synchronised between tabs
+- [[josh-bridge](https://github.com/josh-bridge)] Volume slider now controls every audio player on a page
+- [[josh-bridge](https://github.com/josh-bridge)] Changed Extension Icon set to new logo
+- [[josh-bridge](https://github.com/josh-bridge)] Code improvements & comments
+
+# Version 1.4
+
+- [[josh-bridge](https://github.com/josh-bridge)] Fixed slider not appearing on home page
+- [[josh-bridge](https://github.com/josh-bridge)] Fixed slider not changing audio volume on home page (Issue #3)
+- [[josh-bridge](https://github.com/josh-bridge)] Volume slider now changes audio volume while being dragged (not just when user lets go of the slider)
+- [[josh-bridge](https://github.com/josh-bridge)] Added new CSS stylesheet for easier style management
+- [[josh-bridge](https://github.com/josh-bridge)] Changed style & position of volume slider on album page & home pages
+- [[josh-bridge](https://github.com/josh-bridge)] Added speaker icon with mute/unmute functionality (Speaker icon changes on volume level)
+
 ## Known Limitations
-- The volume slider does not work on the compact UI yet. When you make the page smaller, the volume bar does not show up on the compact UI.
+- The volume slider does not work on the compact UI yet (only album pages don't work, It will work on other pages such as the home page). When you make the page smaller, the volume bar does not show up on the compact UI.
 
 ## License
 All source code in this project are licensed under the MIT license.

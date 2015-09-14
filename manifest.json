@@ -1,26 +1,30 @@
 {
-	"name":"Bandcamp Volume",
-	"manifest_version":2,
-	"version":"1.4",
-	
-	"description":"Adds a volume slider to Bandcamp album pages on bandcamp.com",
-	"permissions":[
-		"storage"
-	],
-  	"icons": {
-    	"32":  "images/logos/logo_32.png",
-    	"64":  "images/logos/logo_64.png",
-    	"128": "images/logos/logo_128.png"
-  	},
-    "web_accessible_resources": [
+    "name":"Bandcamp Volume",
+    "manifest_version":2,
+    "version":"1.5",
+    
+    "description":"Adds a volume slider to most pages on bandcamp.com",
+    "permissions":[
+        "storage"
+    ],
+    "options_ui":{
+        "page": "options/options.html",
+        "chrome_style": true
+    },
+    "icons":{
+        "32":  "images/logos/logo_32.png",
+        "64":  "images/logos/logo_64.png",
+        "128": "images/logos/logo_128.png"
+    },
+    "web_accessible_resources":[
         "fonts/*.*",
         "images/icons/*.png"
     ],
-	"content_scripts":[
-		{
-			"matches":["*://*.bandcamp.com/*"],
+    "content_scripts":[
+        {
+            "matches":["*://*.bandcamp.com/*"],
             "css":["css/style.css"],
-			"js":["scripts/volume.js"]
-		}
-	]
+            "js":["scripts/volume.js"]
+        }
+    ]
 }

@@ -1,181 +1,229 @@
 var BandcampVolume = 
 {
-    _ranges:[],
-    _audiotags:[],
-    _volSpeaker:null,
-    _lastVol:null,
-    _slider_lastVol:null,
-    _slider_change:function(evt)
+    _range:null, // Input range slider (object)
+    _audiotags:[], // Audio tags (object array)
+    _volSpeaker:null, // Speaker button  (object)
+    _lastVol:null, // Last saved volume (float)
+    _muteValue:null, // volSpeaker next volume (float)
+    _syncVol:null, // Whether or not to sync volume across tabs (bool)
+    _saveVol:null, // Whether or not to save volume (bool)
+    _slider_change:function(newvol) // Set the audio players to slider value (on event)
     {
-        var vol = parseFloat(evt.target.value)
-        // Set the audio tag's volume to the slider's volume
-        for(i = 0;i < this._audiotags.length; i++) {
-            this._audiotags[i].volume = vol
+        // Set every audio tag's volume to the new volume
+        for (i = 0;i < this._audiotags.length; i++) {
+            this._audiotags[i].volume = newvol
         }
 
-        this._volSpeaker_set(vol)
+        // Set the spekaer icon to the new volume
+        this._volSpeaker_set(newvol)
     },
-    _slider_set:function(evt)
+    _setVolume:function(newvol)
     {
-        // Get the value of the input
-        var newvol = parseFloat(evt.target.value)
-
-        // Put it in Chrome's local storage for global persistance
-        chrome.storage.local.set({"volume":newvol})
-
-        // Yes I know I am going to set the slider that's triggering this event to it's own value.
-        this._ranges.forEach(function(element, index, array)
-        {
-            element.value = newvol
-        })
-
-        if (evt.target.className.match(/range/g) == "range") {
-            if (newvol == 0) {
-                if(this._slider_lastVol > 0)
-                    this._volSpeaker.value = this._slider_lastVol
-                else
-                    this._volSpeaker.value = 0.8
-            } else if (newvol > 0) {
-                this._volSpeaker.value = 0
-            }
-            this._slider_lastVol = newvol
-        }
-    },
-    _set_volume_evt:function(evt)
-    {
-        var vol = parseFloat(evt.target.value)
-
-        this._lastVol = this._audiotags[0].volume
-
-        this._slider_change(evt)
-        this._slider_set(evt)
-
-        if(evt.target.className.match(/label/g) == "label") {
-            if(vol == 0 && this._lastVol > 0) {
-                this._volSpeaker.value = this._lastVol
-            } else if(vol > 0) {
-                this._volSpeaker.value = 0
-            }
+        // Set every audio tag's volume to the new volume
+        for (i = 0;i < this._audiotags.length; i++) {
+            this._audiotags[i].volume = newvol
         }
 
+        // Set the slider to the new volume (For when Mute / Un-Mute button is pressed)
+        this._range.value = newvol
+
+        // Set the spekaer icon to the new volume
+        this._volSpeaker_set(newvol)
+
+        // Put it in Chrome's local storage for global persistance if the save volume option is enabled
+        if(this._saveVol) chrome.storage.local.set({"volume":newvol}) 
+
+        // If action was 'Mute', set 'Un-Mute' value to the 'last volume' (previous volume before muting)
+        if (newvol == 0) {
+            this._muteValue = this._lastVol
+        // If changed to something above '0', set the 'mute' value to '0' and save new volume as the new 'last volume'
+        } else if (newvol > 0) {
+            this._muteValue = 0
+            this._lastVol = newvol
+        }
     },
-    _auto_set:function(bcv) 
+    _auto_set:function() // On page load set initial volume
     {
+        var bcv = this
+        // Set the volume on page load to either the last stored volume or the default volume of the audio players
         chrome.storage.local.get("volume", function(items) {
             var newvol = items["volume"] || bcv._audiotags[0].volume
 
-            bcv._ranges.forEach(function(element, index, array)
-            {
-                element.value = newvol
-            })
-            bcv._audiotags.forEach(function(element, index, array) {
-                bcv._audiotags[index].volume = newvol
-            })
+            // JS doesn't distinguish '0' and 'false' unless you tell it to, so make sure it's not just been muted instead of not being set
+            if(items["volume"] === 0) newvol = 0
+
+            // Set the audio players to the initial volume
+            for (i = 0;i < bcv._audiotags.length; i++) {
+                bcv._audiotags[i].volume = newvol
+            }
+
+            // Set the slider to the initial volume
+            bcv._range.value = newvol
+
+            // Set the spekaer icon to the initial volume
             bcv._volSpeaker_set(newvol)
-            if(newvol > 0) bcv._volSpeaker.value = 0
+
+            // If initial volume is above '0' set the 'mute' value to '0' and set the 'last volume' to the initial volume
+            if (newvol > 0) {
+                bcv._lastVol = newvol
+                bcv._muteValue = 0
+            // Otherwise set 'Un-Mute' value to default '0.85' and the 'last volume' will automatically set once Un-Muted
+            } else {
+                bcv._muteValue = 0.85
+            }
         })
     },
-    _volSpeaker_set:function(volume) 
+    _syncVolOptions:function() // Retrieve extension options, and save them as variables and in localStorage
     {
-        if(volume > 0) {
+        var bcv = this
+        chrome.storage.sync.get(function(items) {
+            bcv._saveVol = items.saveVolume
+            localStorage.setItem("saveVolume", items.saveVolume)
+            bcv._syncVol = items.syncVolume
+            localStorage.setItem("syncVolume", items.syncVolume)
+            // If the user doesn't want to save the volume, then remove all previous data
+            if(!items.saveVolume) chrome.storage.local.clear()
+        })
+    },
+    _volSpeaker_set:function(newvol) // Set speaker button icon based on volume level
+    {
+        // Set a base class so the string doesn't need to be repeated 4 times
+        var classBase = "BandcampVolume_speaker BandcampVolume_icon_volume_"
+
+        // If Un-Muting (or at least changing the volume without setting to '0') set the speaker button's title to 'Mute'
+        if (newvol > 0) {
             this._volSpeaker.title = "Mute" 
-            if(volume > 0.66) {
-                this._volSpeaker.className = "BandcampVolume_label BandcampVolume_icon_volume_high"
-            } else if (volume > 0.33) {
-                this._volSpeaker.className = "BandcampVolume_label BandcampVolume_icon_volume_med"
-            } else if (volume > 0) {
-                this._volSpeaker.className = "BandcampVolume_label BandcampVolume_icon_volume_low"
+
+            // Set class according to volume level
+            if (newvol > 0.66) {
+                this._volSpeaker.className = classBase + "high"
+            } else if (newvol > 0.33) {
+                this._volSpeaker.className = classBase + "med"
+            } else if (newvol > 0) {
+                this._volSpeaker.className = classBase + "low"
             }
-        } else if (volume == 0) {
-            this._volSpeaker.className = "BandcampVolume_label BandcampVolume_icon_volume_mute"
+
+        // If Muting, set the speaker button title to 'Mute'
+        } else if (newvol == 0) {
+            this._volSpeaker.className = classBase + "mute"
             this._volSpeaker.title = "Un-Mute"
         }
     },
-    _this_page:function()
+    _this_page:function() // Return the identified page name
     {
-        if(document.URL.match(/\/bandcamp.com\//g) == "/bandcamp.com/") {
-            if(document.getElementsByTagName("title")[0].text == "Bandcamp") {
-                //Homepage (/)
-                return "home"
-            } else if(document.getElementsByTagName("title")[0].text.match(/Discover/g) == "Discover") {
-                //Discover Page (/discover)
-                return "discover"
-            } else if (document.getElementsByTagName("title")[0].text.match(/Music/g) == "Music") {
-                //User Feed (/username/feed)
-                return "feed"
-            } else if (document.getElementsByTagName("title")[0].text.match(/collection/g) == "collection") {
-                //User Collection (/username)
-                return "collection"
-            }
+        // If there is no Artist or Label subdomain
+        if (document.URL.match(/\/bandcamp.com\//g) == "/bandcamp.com/") {
+            if (document.getElementsByTagName("title")[0].text == "Bandcamp")
+                return "home" // Homepage (/)
+            else if (document.getElementsByTagName("title")[0].text.match(/Discover/g) == "Discover")
+                return "discover" // Discover Page (/discover)
+            else if (document.getElementsByTagName("title")[0].text.match(/Music/g) == "Music")
+                return "feed" // User Feed (/username/feed)
+            else if (document.getElementsByTagName("title")[0].text.match(/collection/g) == "collection")
+                return "collection" // User Collection (/username)
+        
+        // If there is an Artist or Label subdomain
         } else {
-            //album or artist page
-            return "user"
+            return "user" // Album, Artist or Label page
         }
 
         return null
     },
-    _containerResize:function()
+    _containerResize:function() // Set volume slider location based on bandcamp page container width
     {
-        if(this._this_page() == "home") {
+        // Container is different on the homepage than on every other page, so find out which page it is
+        if (this._this_page() == "home") {
             var wrapper = document.getElementsByClassName('home-bd')[0]
         } else {
             var wrapper = document.getElementById('centerWrapper')
         }
 
+        // Find the page containers width and set the slider outer container to that width
         var wrapper_style = (wrapper.currentStyle || window.getComputedStyle(wrapper, null)),
         outerContainer = document.getElementsByClassName('BandcampVolume_outer_container')[0]
         outerContainer.style.width = wrapper_style.width
     },
-    load:function()
+    load:function() // Main function
     {
-        var page = this._this_page()
+        // Make document variable as some functions need it this way (but use this variable for every call instead of 'this')
+        var bcv = this
 
-        this._audiotags = Array.prototype.slice.call(document.getElementsByTagName("audio"))
+        // Check to see if the options have updated since the last page load (If they have, they will not apply until the page has finished loading - this is due to chrome.storage being asynchronous)
+        window.addEventListener("load", function(event) {bcv._syncVolOptions()})
 
+        // Find all audio players on the current page and put into object array
+        bcv._audiotags = Array.prototype.slice.call(document.getElementsByTagName("audio"))
+
+        // If there are no audio players then don't display Bandcamp Volume
+        if (bcv._audiotags.length == 0) return
+
+        // Find out which page is loaded
+        var page = bcv._this_page()
+
+        // Retrieve last saved options from localStorage (Saving them in localStorage means they can be loaded synchronously, and then applied while the page is still loading)
+        // The default settings are both true unless the localStorage values are set or the chrome.storage value is updated (This will auto update localStorage and the local variable via _syncVolOptions)
+        bcv._saveVol = localStorage.getItem("saveVolume") || true
+        bcv._syncVol = localStorage.getItem("syncVolume") || true
+
+        // Create input slider and set attributes
+        bcv._range = document.createElement("input")
+        bcv._range.className = "BandcampVolume_range"
+        bcv._range.type="range"
+        bcv._range.max = 1
+        bcv._range.step = 0.01
+        bcv._range.min = 0
+
+        // Listen for if the slider value is changed, set the audio volume and chrome storage value accordingly
+        // (An 'input' event fires the moment the slider changes value, a 'change' event only fires when slider is un-clicked)
+        // If we stored the value on 'input' event, this screws up the chrome.storage event listener, as you're trying to change the value while chrome is also trying to change the value
+        bcv._range.addEventListener("input", function(event) {bcv._slider_change(event.target.value)})
+        bcv._range.addEventListener("change", function(event) {bcv._setVolume(event.target.value)})
+
+        // Create speaker button and place in object variable
+        bcv._volSpeaker = document.createElement("button")
+        bcv._volSpeaker.type = "button"
+
+        // Auto set initial volume and objects
+        bcv._auto_set()
+
+        // Listen for if the speaker button is clicked, if so set the audio volume to the muteValue variable and put it in chrome storage
+        bcv._volSpeaker.addEventListener("click", function(event) {bcv._setVolume(bcv._muteValue)})
+
+        // Listen to see if the volume is changed in chrome.storage, or if the options are updated in chrome.storage.
+        chrome.storage.onChanged.addListener(function(changes, name) {
+            if(changes.saveVolume != null || changes.syncVolume != null) bcv._syncVolOptions()
+
+            if(bcv._syncVol && changes.volume != null) bcv._setVolume(changes.volume.newValue)
+        })
+
+        // Create main container div for volume slider and append the speaker button & volume slider to it
         var volcontainer = document.createElement("div")
-        this._volSpeaker = document.createElement("button")
-        this._volSpeaker.type = "button"
-        var range = document.createElement("input")
-        range.className = "BandcampVolume_range"
-        this._auto_set(this)
+        volcontainer.appendChild(bcv._volSpeaker)
+        volcontainer.appendChild(bcv._range)
 
-        if(page == "user") {
+        // If current page is an Album, Artist or Label page then set styles and insert slider accordingly
+        if (page == "user") {
             volcontainer.className = "BandcampVolume_user_container"   
 
             var desktop_view = document.getElementsByClassName("inline_player")[0]            
-            // Create the volume layout
             desktop_view.querySelector("tr:first-child td:first-child").setAttribute("rowspan", "3")
 
             var row = document.createElement("tr"),
             col = row.appendChild(document.createElement("td"))
             col.setAttribute("colspan", "3")
+            col.appendChild(volcontainer)
 
-            // Get some stuff from the player progress bar to add style to the volume bar
-            var playprogbar = desktop_view.querySelector(".progbar_empty"),
-            playprogbar_style = (playprogbar.currentStyle || window.getComputedStyle(playprogbar, null)),
-            playprogbarthumb = desktop_view.querySelector(".thumb"),
-            playprogbarthumb_style = (playprogbarthumb.currentStyle || window.getComputedStyle(playprogbarthumb, null)),
-            css = "/*BandcampVolume CSS*/ .BandcampVolume_range {background: " + playprogbar_style.backgroundColor + "; border: " + playprogbar_style.border + "} .BandcampVolume_range::-webkit-slider-thumb {background: " + playprogbarthumb_style.background + " !important; border: " + playprogbarthumb_style.border + " !important; border-color: " + playprogbarthumb_style.borderColor + " !important; height: 10px; width: 17px; border-radius: 2px;}"
-            
-            style=document.createElement('style')
-            if (style.styleSheet)
-                style.styleSheet.cssText=css
-            else 
-                style.appendChild(document.createTextNode(css))
-            document.getElementsByTagName('head')[0].appendChild(style)
+            // Inject Bandcamp Volume into page
+            desktop_view.querySelector("tbody").appendChild(row)
+
+        // If current page is any other page then set styles and insert slider accordingly
         } else {
-            range.className = range.className + " BandcampVolume_range_home"
+            bcv._range.className = bcv._range.className + " BandcampVolume_range_home"
 
             volcontainer.className = "BandcampVolume_container"
-            if(page == "home") {
-                var wrapper = document.getElementsByClassName('home-bd')[0]
-            } else {
-                var wrapper = document.getElementById('centerWrapper')
-            }
-            var wrapper_style = (wrapper.currentStyle || window.getComputedStyle(wrapper, null)),
-            outerContainer = document.createElement("div")
+
+            var outerContainer = document.createElement("div")
             outerContainer.className = "BandcampVolume_outer_container"
-            outerContainer.style.width = wrapper_style.width
 
             var innerContainer = document.createElement("div")
             innerContainer.className = "BandcampVolume_inner_container"
@@ -183,34 +231,24 @@ var BandcampVolume =
             var volHover = document.createElement("div")
             volHover.className = "BandcampVolume_hoverBox"
             volHover.className = volHover.className + " icon-volume"
-        }
 
-        range.type="range"
-        range.max = 1
-        range.step = 0.01
-        range.min = 0
-        range.value = this._audiotags[0].volume
-        range.addEventListener("input", this._slider_change.bind(this))
-        range.addEventListener("change", this._slider_set.bind(this))
-        this._volSpeaker.addEventListener("click", this._set_volume_evt.bind(this))       
-        this._ranges.push(range)
-
-        volcontainer.appendChild(this._volSpeaker)
-        volcontainer.appendChild(range)
-
-        if(page == "user") {
-            col.appendChild(volcontainer)
-            desktop_view.querySelector("tbody").appendChild(row)
-        } else {
             innerContainer.appendChild(volcontainer)
             innerContainer.appendChild(volHover)
             outerContainer.appendChild(innerContainer)
+
+            // Set wrapper to append to based on type of container (As mentioned before, the homepage has a different container than the other pages)
+            if (page == "home")
+                var wrapper = document.getElementsByClassName('home-bd')[0]
+            else
+                var wrapper = document.getElementById('centerWrapper')
+            
+            // Inject Bandcamp Volume into page
             wrapper.appendChild(outerContainer)
 
-            var bcv = this
-            window.addEventListener('resize', function(event){bcv._containerResize()})      
+            // Make sure slider outer container is the same width as the page container, and listen to see if the page container changes width
+            bcv._containerResize()
+            window.addEventListener('resize', function(event){bcv._containerResize()})
         }
-
     }
 }
 
