@@ -133,7 +133,7 @@ var BandcampVolume = {
     _updateSavedVolume: function(saveVol) {
         this._saveVol = saveVol;
         if (saveVol) {
-            chrome.storage.local.set({"volume":this._lastVothis._lastVol});
+            chrome.storage.local.set({"volume": this._lastVol});
         } else {
             chrome.storage.local.clear();
         }
@@ -184,7 +184,7 @@ var BandcampVolume = {
         // (An 'input' event fires the moment the slider changes value, a 'change' event only fires when slider is un-clicked)
         // If we stored the value on 'input' event, this screws up the chrome.storage event listener, as you're trying to change the value while chrome is also trying to change the value
         bcv._range.addEventListener("input", function(event) {
-            bcv._slder_change(event.target.value);
+            bcv._slider_change(event.target.value);
         });
 
         bcv._range.addEventListener("change", function(event) {
