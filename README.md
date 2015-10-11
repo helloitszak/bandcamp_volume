@@ -11,16 +11,15 @@ I browse Bandcamp a lot for albums which uses an html5 based audio player. This 
 From the [Bandcamp FAQ Page](http://bandcamp.com/faq#volume):
 > There isn't one. If your fans want to change the volume of the audio on Bandcamp, they adjust their computer's volume -- simple as that. We're not trying to build the ultimate platform for them to stream your albums while they play World of Warcraft in another window (which we completely agree would require an independent volume control). The streams on Bandcamp are there so visitors can listen to your music, decide if they like it, and if so, download it. Nothing more.
 
-This gave me inspiration to try and refresh my knowledge on HTML/JS/CSS and start learning basic Chrome Extensions.
-
-I'd also like to give a shoutout to [Aaron Ahmed](https://github.com/polar-bear) for helping me derust my JS and CSS.
+## Working on this
+Feel free to send pull requests with bug fixes, new features etc.
+Please make sure it passes [[http://eslint.org/](ESLint)] before submitting the PR.
 
 ## Changelog
 
 ### Version 2.0
 
 - [[josh-bridge](https://github.com/josh-bridge)] Added options page
-- [[josh-bridge](https://github.com/josh-bridge)] Volume can now be synchronised between tabs
 - [[josh-bridge](https://github.com/josh-bridge)] Volume slider now controls every audio player on a page
 - [[josh-bridge](https://github.com/josh-bridge)] Changed Extension Icon set to new logo
 - [[josh-bridge](https://github.com/josh-bridge)] Code improvements & comments
