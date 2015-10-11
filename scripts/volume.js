@@ -1,11 +1,10 @@
-var BandcampVolume = 
+var BandcampVolume =
 {
     _range:null, // Input range slider (object)
     _audiotags:[], // Audio tags (object array)
     _volSpeaker:null, // Speaker button  (object)
-    _lastVol:null, // Last saved volume (float)
+    _lastVol:0.85, // Last saved volume (float)
     _muteValue:null, // volSpeaker next volume (float)
-    _syncVol:null, // Whether or not to sync volume across tabs (bool)
     _saveVol:null, // Whether or not to save volume (bool)
     _slider_change:function(newvol) // Set the audio players to slider value (on event)
     {
@@ -31,7 +30,7 @@ var BandcampVolume =
         this._volSpeaker_set(newvol)
 
         // Put it in Chrome's local storage for global persistance if the save volume option is enabled
-        if(this._saveVol) chrome.storage.local.set({"volume":newvol}) 
+        if (this._saveVol) chrome.storage.local.set({"volume":newvol})
 
         // If action was 'Mute', set 'Un-Mute' value to the 'last volume' (previous volume before muting)
         if (newvol == 0) {
@@ -73,18 +72,6 @@ var BandcampVolume =
             }
         })
     },
-    _syncVolOptions:function() // Retrieve extension options, and save them as variables and in localStorage
-    {
-        var bcv = this
-        chrome.storage.sync.get(function(items) {
-            bcv._saveVol = items.saveVolume
-            localStorage.setItem("saveVolume", items.saveVolume)
-            bcv._syncVol = items.syncVolume
-            localStorage.setItem("syncVolume", items.syncVolume)
-            // If the user doesn't want to save the volume, then remove all previous data
-            if(!items.saveVolume) chrome.storage.local.clear()
-        })
-    },
     _volSpeaker_set:function(newvol) // Set speaker button icon based on volume level
     {
         // Set a base class so the string doesn't need to be repeated 4 times
@@ -92,7 +79,7 @@ var BandcampVolume =
 
         // If Un-Muting (or at least changing the volume without setting to '0') set the speaker button's title to 'Mute'
         if (newvol > 0) {
-            this._volSpeaker.title = "Mute" 
+            this._volSpeaker.title = "Mute"
 
             // Set class according to volume level
             if (newvol > 0.66) {
@@ -121,7 +108,7 @@ var BandcampVolume =
                 return "feed" // User Feed (/username/feed)
             else if (document.getElementsByTagName("title")[0].text.match(/collection/g) == "collection")
                 return "collection" // User Collection (/username)
-        
+
         // If there is an Artist or Label subdomain
         } else {
             return "user" // Album, Artist or Label page
@@ -143,13 +130,34 @@ var BandcampVolume =
         outerContainer = document.getElementsByClassName('BandcampVolume_outer_container')[0]
         outerContainer.style.width = wrapper_style.width
     },
+    _updateSavedVolume: function(saveVol) {
+        this._saveVol = saveVol;
+        if (saveVol) {
+            chrome.storage.local.set({"volume":this._lastVothis._lastVol})
+        } else {
+            chrome.storage.local.clear();
+        }
+    },
     load:function() // Main function
     {
         // Make document variable as some functions need it this way (but use this variable for every call instead of 'this')
         var bcv = this
 
         // Check to see if the options have updated since the last page load (If they have, they will not apply until the page has finished loading - this is due to chrome.storage being asynchronous)
-        window.addEventListener("load", function(event) {bcv._syncVolOptions()})
+        window.addEventListener("load", function(event) {
+            chrome.storage.sync.get(function(items) {
+                if (items.saveVolume != null && items.saveVolume != undefined) {
+                    bcv._updateSavedVolume(items.saveVolume);
+                }
+            });
+        });
+        //
+        // Listen to see if the volume is changed in chrome.storage, or if the options are updated in chrome.storage.
+        chrome.storage.onChanged.addListener(function(changes, name) {
+            if (changes.saveVolume != null && name == "sync") {
+                bcv._updateSavedVolume(changes.saveVolume.newValue);
+            }
+        })
 
         // Find all audio players on the current page and put into object array
         bcv._audiotags = Array.prototype.slice.call(document.getElementsByTagName("audio"))
@@ -162,8 +170,7 @@ var BandcampVolume =
 
         // Retrieve last saved options from localStorage (Saving them in localStorage means they can be loaded synchronously, and then applied while the page is still loading)
         // The default settings are both true unless the localStorage values are set or the chrome.storage value is updated (This will auto update localStorage and the local variable via _syncVolOptions)
-        bcv._saveVol = localStorage.getItem("saveVolume") || true
-        bcv._syncVol = localStorage.getItem("syncVolume") || true
+        //bcv._saveVol = localStorage.getItem("saveVolume") || true
 
         // Create input slider and set attributes
         bcv._range = document.createElement("input")
@@ -176,7 +183,7 @@ var BandcampVolume =
         // Listen for if the slider value is changed, set the audio volume and chrome storage value accordingly
         // (An 'input' event fires the moment the slider changes value, a 'change' event only fires when slider is un-clicked)
         // If we stored the value on 'input' event, this screws up the chrome.storage event listener, as you're trying to change the value while chrome is also trying to change the value
-        bcv._range.addEventListener("input", function(event) {bcv._slider_change(event.target.value)})
+        bcv._range.addEventListener("input", function(event) {bcv._slder_change(event.target.value)})
         bcv._range.addEventListener("change", function(event) {bcv._setVolume(event.target.value)})
 
         // Create speaker button and place in object variable
@@ -189,12 +196,6 @@ var BandcampVolume =
         // Listen for if the speaker button is clicked, if so set the audio volume to the muteValue variable and put it in chrome storage
         bcv._volSpeaker.addEventListener("click", function(event) {bcv._setVolume(bcv._muteValue)})
 
-        // Listen to see if the volume is changed in chrome.storage, or if the options are updated in chrome.storage.
-        chrome.storage.onChanged.addListener(function(changes, name) {
-            if(changes.saveVolume != null || changes.syncVolume != null) bcv._syncVolOptions()
-
-            if(bcv._syncVol && changes.volume != null) bcv._setVolume(changes.volume.newValue)
-        })
 
         // Create main container div for volume slider and append the speaker button & volume slider to it
         var volcontainer = document.createElement("div")
@@ -203,9 +204,9 @@ var BandcampVolume =
 
         // If current page is an Album, Artist or Label page then set styles and insert slider accordingly
         if (page == "user") {
-            volcontainer.className = "BandcampVolume_user_container"   
+            volcontainer.className = "BandcampVolume_user_container"
 
-            var desktop_view = document.getElementsByClassName("inline_player")[0]            
+            var desktop_view = document.getElementsByClassName("inline_player")[0]
             desktop_view.querySelector("tr:first-child td:first-child").setAttribute("rowspan", "3")
 
             var row = document.createElement("tr"),
@@ -241,7 +242,7 @@ var BandcampVolume =
                 var wrapper = document.getElementsByClassName('home-bd')[0]
             else
                 var wrapper = document.getElementById('centerWrapper')
-            
+
             // Inject Bandcamp Volume into page
             wrapper.appendChild(outerContainer)
 
