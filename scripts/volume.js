@@ -170,7 +170,7 @@ var BandcampVolume = {
 
         // Retrieve last saved options from localStorage (Saving them in localStorage means they can be loaded synchronously, and then applied while the page is still loading)
         // The default settings are both true unless the localStorage values are set or the chrome.storage value is updated (This will auto update localStorage and the local variable via _syncVolOptions)
-        //bcv._saveVol = localStorage.getItem("saveVolume") || true
+        bcv._saveVol = localStorage.getItem("saveVolume") || true;
 
         // Create input slider and set attributes
         bcv._range = document.createElement("input");
