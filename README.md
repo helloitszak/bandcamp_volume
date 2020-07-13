@@ -1,19 +1,24 @@
 # Bandcamp Volume
 
-A Chrome Extension to add a volume slider to most [bandcamp](http://www.bandcamp.com) pages.
+A browser extension to add a volume slider to most [Bandcamp](https://bandcamp.com) pages.
 
-## Usage
-You can test this out by cloning the repository and simply loading it into chrome as an unpackaged extention.
+## Installation
+Install this extension for
+[Chrome / Chromium](https://chrome.google.com/webstore/detail/bandcamp-volume/nlikaonifbagdlcjoepofomefchkahab)
 
 ## Background
 I browse Bandcamp a lot for albums which uses an html5 based audio player. This player, however, lacks any form of volume control. When asked about it, Bandcamp responded with the following:
 
-From the [Bandcamp FAQ Page](http://bandcamp.com/faq#volume):
+From the old Bandcamp FAQ page:
 > There isn't one. If your fans want to change the volume of the audio on Bandcamp, they adjust their computer's volume -- simple as that. We're not trying to build the ultimate platform for them to stream your albums while they play World of Warcraft in another window (which we completely agree would require an independent volume control). The streams on Bandcamp are there so visitors can listen to your music, decide if they like it, and if so, download it. Nothing more.
 
-## Working on this
+## Contributing
+You can test or develop by cloning the repository and simply loading it into
+your browser as an unpackaged extention from `chrome://extensions/`, or in
+Firefox, `about:debugging`.
+
 Feel free to send pull requests with bug fixes, new features etc.
-Please make sure it passes [[http://eslint.org/](ESLint)] before submitting the PR.
+Please make sure it passes [ESLint](https://eslint.org/) before submitting the PR.
 
 ## Changelog
 
@@ -31,7 +36,12 @@ Please make sure it passes [[http://eslint.org/](ESLint)] before submitting the 
 - [[josh-bridge](https://github.com/josh-bridge)] Added speaker icon with mute/unmute functionality (Speaker icon changes on volume level)
 
 ## Known Limitations
-- The volume slider does not work on the compact UI yet (only album pages don't work, It will work on other pages such as the home page). When you make the page smaller, the volume bar does not show up on the compact UI.
+- The extension can't operate on custom domains without having the `<all_urls>`
+  permission and running on every page, or having a list of every bandcamp
+  custom domain.
+- The volume slider does not work on the compact UI yet (only album pages don't
+  work, It will work on other pages such as the home page). When you make the
+  page smaller, the volume bar does not show up on the compact UI.
 
 ## License
 All source code in this project are licensed under the MIT license.

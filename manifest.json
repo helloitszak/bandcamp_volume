@@ -2,8 +2,14 @@
     "name":"Bandcamp Volume",
     "manifest_version":2,
     "version":"2.0",
-    
+    "author": "Zak Kristjanson",
     "description":"Adds a volume slider to most pages on bandcamp.com",
+    "homepage_url":"https://github.com/itszakko/bandcamp_volume/",
+    "applications": {
+        "gecko": {
+            "id": "bandcamp-volume@itszakko"
+        }
+    },
     "permissions":[
         "storage"
     ],
@@ -23,7 +29,10 @@
     "content_scripts":[
         {
             "matches":["*://*.bandcamp.com/*"],
-            "css":["css/style.css"],
+            "css":[
+                "css/style.css",
+                "css/font.css"
+            ],
             "js":["scripts/volume.js"]
         }
     ]
