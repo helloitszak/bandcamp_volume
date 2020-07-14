@@ -1,10 +1,12 @@
+"use strict";
+
 var BandcampVolume = {
     _range:null, // Input range slider (object)
     _audiotags:[], // Audio tags (object array)
     _volSpeaker:null, // Speaker button  (object)
-    _lastVol:0.85, // Last saved volume (float)
+    _lastVolume:0.85, // Last saved volume (float)
     _muteValue:null, // volSpeaker next volume (float)
-    _saveVol:null, // Whether or not to save volume (bool)
+    _saveVolume:null, // Whether or not to save volume (bool)
     _slider_change:function(newvol) // Set the audio players to slider value (on event)
     {
         // Set every audio tag's volume to the new volume
@@ -12,7 +14,7 @@ var BandcampVolume = {
             this._audiotags[i].volume = newvol;
         }
 
-        // Set the spekaer icon to the new volume
+        // Set the speaker icon to the new volume
         this._volSpeaker_set(newvol);
     },
     _setVolume:function(newvol)
@@ -29,15 +31,15 @@ var BandcampVolume = {
         this._volSpeaker_set(newvol);
 
         // Put it in Chrome's local storage for global persistance if the save volume option is enabled
-        if (this._saveVol) chrome.storage.local.set({"volume":newvol});
+        if (this._saveVolume) chrome.storage.local.set({"volume":newvol});
 
         // If action was 'Mute', set 'Un-Mute' value to the 'last volume' (previous volume before muting)
         if (newvol == 0) {
-            this._muteValue = this._lastVol;
+            this._muteValue = this._lastVolume;
         // If changed to something above '0', set the 'mute' value to '0' and save new volume as the new 'last volume'
         } else if (newvol > 0) {
             this._muteValue = 0;
-            this._lastVol = newvol;
+            this._lastVolume = newvol;
         }
     },
     _auto_set:function() // On page load set initial volume
@@ -63,7 +65,7 @@ var BandcampVolume = {
 
             // If initial volume is above '0' set the 'mute' value to '0' and set the 'last volume' to the initial volume
             if (newvol > 0) {
-                bcv._lastVol = newvol;
+                bcv._lastVolume = newvol;
                 bcv._muteValue = 0;
             // Otherwise set 'Un-Mute' value to default '0.85' and the 'last volume' will automatically set once Un-Muted
             } else {
@@ -130,10 +132,10 @@ var BandcampVolume = {
         var outerContainer = document.getElementsByClassName("BandcampVolume_outer_container")[0];
         outerContainer.style.width = wrapper_style.width;
     },
-    _updateSavedVolume: function(saveVol) {
-        this._saveVol = saveVol;
-        if (saveVol) {
-            chrome.storage.local.set({"volume": this._lastVol});
+    _updateSavedVolume: function(saveVolume) {
+        this._saveVolume = saveVolume;
+        if (saveVolume) {
+            chrome.storage.local.set({"volume": this._lastVolume});
         } else {
             chrome.storage.local.clear();
         }
@@ -169,8 +171,7 @@ var BandcampVolume = {
         var page = bcv._this_page();
 
         // Retrieve last saved options from localStorage (Saving them in localStorage means they can be loaded synchronously, and then applied while the page is still loading)
-        // The default settings are both true unless the localStorage values are set or the chrome.storage value is updated (This will auto update localStorage and the local variable via _syncVolOptions)
-        //bcv._saveVol = localStorage.getItem("saveVolume") || true
+        bcv._saveVolume = localStorage.getItem("saveVolume") || true;
 
         // Create input slider and set attributes
         bcv._range = document.createElement("input");
@@ -192,8 +193,7 @@ var BandcampVolume = {
         });
 
         // Create speaker button and place in object variable
-        bcv._volSpeaker = document.createElement("button");
-        bcv._volSpeaker.type = "button";
+        bcv._volSpeaker = document.createElement("span");
 
         // Auto set initial volume and objects
         bcv._auto_set();
