@@ -193,8 +193,7 @@ var BandcampVolume = {
         });
 
         // Create speaker button and place in object variable
-        bcv._volSpeaker = document.createElement("button");
-        bcv._volSpeaker.type = "button";
+        bcv._volSpeaker = document.createElement("span");
 
         // Auto set initial volume and objects
         bcv._auto_set();
